@@ -19,7 +19,7 @@ spring:
   #    defer-datasource-initialization: true # sql.data 전용
   data:
     redis:
-      host: 192.168.0.13
+      host: 127.0.0.1
       port: 6379
   security:
     oauth2:
