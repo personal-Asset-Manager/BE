@@ -2,6 +2,7 @@ package com.jjoony.assetmanagement.domain.member.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -19,29 +20,45 @@ public class Member {
     private Long memberId;
 
     @Column(nullable = false, unique = true)
-    @Setter
+    @NotBlank(message = "이메일은 필수입니다.")
     private String email;
 
     @Setter
     private String password;
 
     @Setter
+    @Column(length = 50)
     private String nickname;
+
+    @Setter
+    @Enumerated(EnumType.STRING)
+    private JobType jobType;
+
+    @Setter
+    private Boolean gender;
+
+    @Setter
+    @Column(length = 50)
+    private String birth;
+
+    private final LocalDateTime createdAt = LocalDateTime.now();
+
+    @Setter
+    private LocalDateTime loginAt = LocalDateTime.now();
+
+    @Setter
+    private boolean isSignedUp = false;
 
     @Setter
     private String role;
 
-    private String name;
-
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-
     @Builder
-    private Member(Long memberId, String email, String name, String nickname, String role) {
-        this.memberId = memberId;
+    private Member(String email, String nickname, Boolean gender, String birth,JobType jobType, String role) {
         this.email = email;
+        this.gender = gender;
+        this.birth = birth;
         this.nickname = nickname;
-        this.name = name;
+        this.jobType = jobType;
         this.role = role;
     }
 }

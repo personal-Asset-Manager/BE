@@ -14,6 +14,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -51,7 +53,12 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth)->auth
-                    .anyRequest().permitAll());
+                        .requestMatchers("/api/auth/reissue").hasRole("USER")
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/logout").hasRole("USER")
+                        .requestMatchers("/api/member/update").hasRole("USER")
+                        .requestMatchers("/api/member/signup").permitAll()
+                        .anyRequest().permitAll());
 
         http
                 .headers(header -> header
@@ -78,6 +85,10 @@ public class SecurityConfig {
         return source;
     }
 
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
         return web -> web.ignoring()

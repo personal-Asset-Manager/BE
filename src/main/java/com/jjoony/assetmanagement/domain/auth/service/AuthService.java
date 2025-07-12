@@ -1,5 +1,6 @@
 package com.jjoony.assetmanagement.domain.auth.service;
 
+import com.jjoony.assetmanagement.domain.auth.dto.LoginRequest;
 import com.jjoony.assetmanagement.domain.auth.dto.TokenResponse;
 import com.jjoony.assetmanagement.domain.member.entity.Member;
 import com.jjoony.assetmanagement.domain.member.repository.MemberRepository;
@@ -8,6 +9,7 @@ import com.jjoony.assetmanagement.global.exception.ErrorCode;
 import com.jjoony.assetmanagement.global.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ public class AuthService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     //accessToken 재발급
     public TokenResponse reissue(String refreshToken) {
@@ -71,5 +74,24 @@ public class AuthService {
 
         refreshTokenService.deleteToken(email);
         log.info("로그아웃 완료: email={}", email);
+    }
+
+    public TokenResponse lgoin(LoginRequest request) {
+
+        Member member = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+            throw new ApiException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        String email = member.getEmail();
+        String accessToken = jwtProvider.createAccessToken(member.getEmail(), member.getRole());
+        String refreshToken = jwtProvider.createRefreshToken(member.getEmail());
+
+        long refreshExpireTime = 1000L * 60 * 60 * 24 * 7;
+        refreshTokenService.saveToken(email, refreshToken, refreshExpireTime);
+
+        return new TokenResponse(accessToken, refreshToken);
     }
 }
