@@ -23,6 +23,9 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     public MemberResponse updateMember(PrincipalDetails principalDetails, SignUpRequest signUpRequest) {
+
+        log.info("소셜 유저 추가정보 업데이트: signUpRequest={}", signUpRequest);
+
         Member member = memberRepository.findByEmail(principalDetails.getMember().getEmail())
                 .orElseThrow(()-> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -30,11 +33,15 @@ public class MemberService {
         member.setSignedUp(true);
         memberRepository.save(member);
 
+        log.info("추가정보 업데이트 완료: member={}", member);
         return memberMapper.toResponse(member);
 
     }
 
     public MemberResponse signup(SignUpRequest signUpRequest) {
+
+        log.info("일반 유저 회원가입: signUpRequest={}", signUpRequest);
+
         if (memberRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
             throw new ApiException(ErrorCode.MEMBER_ALREADY_SIGNEDUP);
         }
@@ -46,6 +53,7 @@ public class MemberService {
         member.setSignedUp(true);
         memberRepository.save(member);
 
+        log.info("일반유저 회원가입 완료: member={}", member);
         return memberMapper.toResponse(member);
     }
 }

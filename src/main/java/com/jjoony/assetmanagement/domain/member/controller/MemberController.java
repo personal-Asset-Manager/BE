@@ -21,6 +21,7 @@ public class MemberController {
     @Operation(summary = "일반 이메일 회원가입", description = "일반 회원가입을 위한 api 입니다.")
     @PostMapping("signup")
     public ResponseEntity<MemberResponse> signup(@Validated @RequestBody SignUpRequest signUpRequest) {
+
         MemberResponse response = memberService.signup(signUpRequest);
         return ResponseEntity.ok(response);
     }

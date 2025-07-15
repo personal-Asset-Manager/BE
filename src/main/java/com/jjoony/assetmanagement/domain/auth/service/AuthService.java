@@ -78,6 +78,7 @@ public class AuthService {
 
     public TokenResponse lgoin(LoginRequest request) {
 
+        log.info("로그인 요청: request={}", request);
         Member member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -92,6 +93,7 @@ public class AuthService {
         long refreshExpireTime = 1000L * 60 * 60 * 24 * 7;
         refreshTokenService.saveToken(email, refreshToken, refreshExpireTime);
 
+        log.info("로그인 완료: email={}, refreshToken={}", email, refreshToken);
         return new TokenResponse(accessToken, refreshToken);
     }
 }
